@@ -23,9 +23,8 @@ The reported CelebA evaluation additionally requires:
 - the inherited train/validation/test split and the released fixed test seeds;
 - a CUDA-capable environment for practical runtime.
 
-Those artifacts are not redistributed here. The released YAML files record the controller settings, while the paper documents the sampler, seed pairing, evaluation population, metrics, and claim limits. `results/main_results.csv` is the immutable full row-level aggregate used by the paper; `results/pareto.csv` is a compact view.
+Those artifacts are not redistributed here. The released YAML files record the controller settings, while the paper documents the sampler, seed pairing, evaluation population, metrics, and claim limits. [`main_results.csv`](../results/main_results.csv) is the immutable full aggregate used by the paper; [`pareto.csv`](../results/pareto.csv) is a compact view.
 
 ## Result interpretation
 
 All methods use paired initial noise. Runtime percentages are measurements on the original execution environment and should not be treated as hardware-independent constants. KID compares generated samples with the inherited full CelebA marginal; it is therefore an unconditional realism/diversity diagnostic, not direct evidence of target-conditional fidelity.
-

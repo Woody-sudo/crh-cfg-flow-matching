@@ -1,0 +1,9 @@
+attribute,accuracy,balanced_accuracy,f1,evidence_status
+smiling,0.8997,0.9015,0.8910,usable
+bangs,0.9492,0.9082,0.8401,usable
+black_hair,0.8697,0.8570,0.7635,moderate
+blond_hair,0.9435,0.8845,0.7603,moderate
+brown_hair,0.8377,0.7728,0.6387,weak-to-moderate
+exclusive_hair_argmax,0.6937,,,diagnostic
+joint,0.5971,,,diagnostic
+

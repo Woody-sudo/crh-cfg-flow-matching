@@ -1,50 +1,67 @@
-# Constraint-Aware Receding-Horizon CFG
+# From Conditional Flow Matching to Constraint-Aware Guidance
 
-CRH-CFG is a training-free controller for attribute-conditioned flow matching. It reuses the frozen conditional/unconditional velocity pair, analytically forecasts candidate clean endpoints, scores them with an external attribute evaluator, and selects the smallest feasible guidance intervention. The generator architecture and number of generator field evaluations remain unchanged.
+This repository presents the HW3 → HW4 research progression from CMU 10-799: Diffusion & Flow Matching (Spring 2026), by **Mu Chen**.
 
-> Course project by **Mu Chen** for CMU 10-799: Diffusion & Flow Matching (Spring 2026).
+- **HW3 — establish:** train a semantic conditional Flow Matching model and verify that classifier-free guidance controls CelebA attributes.
+- **HW4 — control:** freeze that generator, reuse its conditional/unconditional field pair, and select guidance online under target and preservation constraints.
 
-[Paper](paper/main.pdf) · [Poster](poster/crh_cfg_poster.pdf) · [Editable poster](poster/crh_cfg_poster.pptx) · [Compact results](results/pareto.csv)
+[HW3 baseline](hw3/README.md) · [HW4 method](hw4/README.md) · [Paper](hw4/paper/main.pdf) · [Course poster](hw4/poster/crh_cfg_poster.pdf)
 
-![Paired qualitative comparison](figures/blond_hair_paired_methods.png)
+## Research arc
 
-## Method in one equation
+```text
+Straight-path Flow Matching
+        ↓ add discrete semantic conditioning + condition dropout
+Frozen conditional/unconditional fields
+        ↓ verify CFG controllability with an independent evaluator
+HW3 baseline: fixed guidance w = 2
+        ↓ expose candidate endpoints from the same affine field family
+HW4 CRH-CFG: forecast → score → constrain → execute
+```
 
-For the frozen unconditional and conditional fields, CRH-CFG constructs
+The key bridge is the affine CFG field
 
 $$
-v_w = v_u + w(v_c-v_u), \qquad \widehat{x}_0(w)=x_s+(1-s)v_w.
+v_w=v_u+w(v_c-v_u),
 $$
 
-At a controller update, candidate scales are evaluated at their forecast endpoints. The controller enforces a target-margin constraint and a protected-attribute drift budget, then chooses the feasible scale nearest ordinary conditional guidance ($w=1$) and the previous decision. If no candidate is feasible, a deterministic penalized fallback is used. See [METHOD.md](docs/METHOD.md) for the full control logic and conventions.
+which HW3 uses at a fixed scale and HW4 turns into a discrete control bank. Under the frozen model's noise-to-data convention, every candidate has the analytic endpoint forecast
 
-## Main empirical readout
+$$
+\widehat{x}_0(w)=x_s+(1-s)v_w.
+$$
 
-The final paired evaluation uses 1,000 fixed seeds for each of three CelebA attribute targets. Relative to the inherited HW3 baseline, full CRH-CFG:
+That forecast lets an external evaluator choose among scales without additional generator forward evaluations.
 
-- retains comparable target success (98.7%, 98.4%, and 99.3%);
-- adds no generator forward evaluations and approximately 1.1–2.7% measured runtime overhead;
-- strongly reduces intervention-induced protected drift relative to unconstrained feedback variants;
-- does **not** establish a conditional quality improvement: KID uses the full CelebA marginal as reference and moves differently across targets.
+## Headline evidence
 
-These are descriptive results for the frozen checkpoint and evaluator used in the course study, not a claim of universal improvement. Exact rows are in [`results/main_results.csv`](results/main_results.csv); limitations are documented in [LIMITATIONS.md](docs/LIMITATIONS.md).
+| Stage | Main result | Honest boundary |
+| --- | --- | --- |
+| HW3 controllability | At $w=2$, predicted success is 99.6% for smiling, 96.9% for bangs, and 94.5% jointly for smiling/no-bangs/blond | One external evaluator; brown-hair evidence is weaker |
+| HW3 speed side study | Heun does not improve the equal-NFE Pareto frontier over Euler | One frozen checkpoint and fixed grids |
+| HW4 CRH-CFG | Comparable target success with matched generator NFE and about 1.1–2.7% measured runtime overhead | No common-reference preservation gain over ordinary conditional guidance |
+| HW4 quality | KID moves differently across targets | Full-marginal KID cannot establish conditional quality improvement |
+
+![HW3 multi-attribute samples](hw3/figures/smiling_no_bangs_blond.png)
+
+![HW4 paired qualitative comparison](hw4/figures/blond_hair_paired_methods.png)
 
 ## Repository map
 
 ```text
-src/                 Controller, endpoint forecast, sampling, and metrics
-tests/               CPU unit tests for invariants and NFE accounting
-configs/             Released controller configurations
-results/             Compact tables from frozen paired evaluations
-figures/             Selected paired samples, schedules, and cases
-paper/               CVPR-style PDF and LaTeX source
-poster/              24x36 course poster (PDF and editable PPTX)
-docs/                Method, reproduction scope, and limitations
+hw3/                 Conditional GFM baseline, reports, configs, results, grids
+hw4/                 CRH-CFG paper, poster, configs, results, and figures
+src/methods/         Flow Matching training/sampling implementation
+src/models/          Conditional U-Net and building blocks
+src/data/            CelebA condition schema and loaders
+src/*.py             HW4 controller, endpoint forecast, metrics, and sampling
+scripts/             Independent HW3 attribute evaluator
+tests/               CPU invariants for both stages
 ```
 
 ## Quick verification
 
-The controller tests do not require CelebA, a checkpoint, or a GPU.
+The test suite uses synthetic tensors and requires neither CelebA nor a checkpoint.
 
 ```bash
 git clone https://github.com/Woody-sudo/crh-cfg-flow-matching.git
@@ -53,13 +70,10 @@ uv sync --dev
 uv run pytest -q
 ```
 
-The release intentionally omits CelebA images/annotations, trained weights, cloud logs, and evaluator checkpoints. See [REPRODUCIBILITY.md](docs/REPRODUCIBILITY.md) for the boundary between immediately runnable controller checks and the full empirical rerun.
+## Reproduction boundary
 
-## Acknowledgments and provenance
+The repository includes code, frozen configurations, exact aggregate tables, paper source, presentation artifacts, and unit tests. It intentionally excludes CelebA data, generator/evaluator checkpoints, cloud logs, and internal review material. See [HW4 reproducibility notes](hw4/docs/REPRODUCIBILITY.md) and the HW3 reports for the assets needed for full image generation.
 
-The study was developed from the CMU 10-799 course workflow. The public repository contains the author’s HW4 controller and presentation artifacts; it does not redistribute the course starter repository. Flow Matching, classifier-free guidance, CelebA, and evaluation references are listed in the paper bibliography.
+## License and provenance
 
-## License
-
-Code in this release is available under the [MIT License](LICENSE). Paper, poster, result tables, and figures are provided for scholarly inspection and citation; third-party datasets, checkpoints, fonts, and templates remain subject to their original terms.
-
+Code in this release is available under the [MIT License](LICENSE). The repository contains the author's course-project implementation and artifacts, not a redistribution of the full course starter repository. Paper, poster, figures, and result tables are provided for scholarly inspection and citation; third-party data, templates, and pretrained assets remain subject to their original terms.

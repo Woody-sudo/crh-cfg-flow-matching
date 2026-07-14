@@ -1,11 +1,10 @@
 cff-version: 1.2.0
-message: "If you use this controller or evidence package, please cite this repository."
-title: "Constraint-Aware Receding-Horizon Classifier-Free Guidance for Attribute-Conditioned Flow Matching"
+message: "If you use this implementation or evidence package, please cite this repository."
+title: "From Conditional Flow Matching to Constraint-Aware Receding-Horizon Guidance"
 type: software
 authors:
   - family-names: Chen
     given-names: Mu
-version: 0.1.0
+version: 0.2.0
 date-released: 2026-07-14
 license: MIT
-

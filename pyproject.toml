@@ -1,14 +1,20 @@
 [project]
 name = "crh-cfg-flow-matching"
-version = "0.1.0"
-description = "Constraint-aware receding-horizon classifier-free guidance for flow matching"
+version = "0.2.0"
+description = "A course-project progression from conditional flow matching to constraint-aware guidance"
 readme = "README.md"
 requires-python = ">=3.10"
 license = {file = "LICENSE"}
 authors = [{name = "Mu Chen"}]
 dependencies = [
     "numpy>=1.21.0",
+    "pillow>=9.0.0",
+    "PyYAML>=6.0",
     "torch>=2.0.0",
+    "torchvision>=0.15.0",
+    "einops>=0.6.0",
+    "tqdm>=4.64.0",
+    "datasets>=2.0.0",
 ]
 
 [dependency-groups]
@@ -30,4 +36,3 @@ testpaths = ["tests"]
 
 [tool.ruff]
 line-length = 100
-

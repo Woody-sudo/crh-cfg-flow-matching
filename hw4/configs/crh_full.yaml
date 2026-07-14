@@ -1,6 +1,6 @@
 method: crh_cfg
 variant: full
-inherits: configs/hw3_baseline_frozen.yaml
+inherits: hw3/configs/frozen_baseline.yaml
 candidate_scales: [0.5, 1.0, 1.5, 2.0, 3.0, 4.0]
 targets:
   smiling_present:

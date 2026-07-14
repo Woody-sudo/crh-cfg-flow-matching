@@ -9,18 +9,17 @@ build/
 .DS_Store
 
 # Models and datasets are intentionally excluded from this public release.
-checkpoints/
-data/
-wandb/
+/checkpoints/
+/data/
+/wandb/
 
 # LaTeX build products.
-paper/*.aux
-paper/*.bbl
-paper/*.blg
-paper/*.brf
-paper/*.fdb_latexmk
-paper/*.fls
-paper/*.log
-paper/*.out
-paper/*.synctex.gz
-
+hw4/paper/*.aux
+hw4/paper/*.bbl
+hw4/paper/*.blg
+hw4/paper/*.brf
+hw4/paper/*.fdb_latexmk
+hw4/paper/*.fls
+hw4/paper/*.log
+hw4/paper/*.out
+hw4/paper/*.synctex.gz
