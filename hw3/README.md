@@ -1,5 +1,7 @@
 # HW3 — Conditional Flow Matching and CFG baseline
 
+**Course: CMU 10-799 — Diffusion & Flow Matching, Spring 2026**
+
 HW3 establishes the frozen generator that HW4 later controls. The project adds discrete CelebA attribute conditioning to a straight-path Flow Matching model, trains with field/row dropout so the same network supports unconditional and conditional predictions, and composes them with classifier-free guidance (CFG).
 
 ## Model and conditions

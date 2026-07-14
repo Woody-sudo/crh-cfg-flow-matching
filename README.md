@@ -1,6 +1,8 @@
 # From Conditional Flow Matching to Constraint-Aware Guidance
 
-This repository presents the HW3 → HW4 research progression from CMU 10-799: Diffusion & Flow Matching (Spring 2026), by **Mu Chen**.
+**CMU 10-799: Diffusion & Flow Matching · Spring 2026 · Mu Chen**
+
+This repository presents the HW3 → HW4 research progression developed for **CMU 10-799: Diffusion & Flow Matching**.
 
 - **HW3 — establish:** train a semantic conditional Flow Matching model and verify that classifier-free guidance controls CelebA attributes.
 - **HW4 — control:** freeze that generator, reuse its conditional/unconditional field pair, and select guidance online under target and preservation constraints.

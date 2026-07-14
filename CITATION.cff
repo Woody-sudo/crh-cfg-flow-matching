@@ -2,6 +2,7 @@ cff-version: 1.2.0
 message: "If you use this implementation or evidence package, please cite this repository."
 title: "From Conditional Flow Matching to Constraint-Aware Receding-Horizon Guidance"
 type: software
+abstract: "HW3 and HW4 course project for CMU 10-799: Diffusion & Flow Matching, Spring 2026."
 authors:
   - family-names: Chen
     given-names: Mu

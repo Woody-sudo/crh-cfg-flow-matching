@@ -1,5 +1,7 @@
 # HW4 — Constraint-aware receding-horizon CFG
 
+**Course: CMU 10-799 — Diffusion & Flow Matching, Spring 2026**
+
 HW4 asks a different question from HW3: once a frozen conditional generator is controllable, can guidance be selected online without retraining or adding generator evaluations?
 
 CRH-CFG reuses the HW3 conditional/unconditional pair, forecasts candidate clean endpoints, scores target margin and protected-attribute drift, and chooses the minimum feasible intervention. The controller keeps the generator and its NFE fixed.
