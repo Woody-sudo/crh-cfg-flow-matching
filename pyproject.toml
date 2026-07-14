@@ -1,0 +1,33 @@
+[project]
+name = "crh-cfg-flow-matching"
+version = "0.1.0"
+description = "Constraint-aware receding-horizon classifier-free guidance for flow matching"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {file = "LICENSE"}
+authors = [{name = "Mu Chen"}]
+dependencies = [
+    "numpy>=1.21.0",
+    "torch>=2.0.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=7.0.0",
+    "ruff>=0.1.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+

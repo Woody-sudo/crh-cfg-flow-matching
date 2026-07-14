@@ -1,0 +1,12 @@
+method: crh_cfg
+variant: target_only
+inherits: configs/hw3_baseline_frozen.yaml
+candidate_scales: [0.5, 1.0, 1.5, 2.0, 3.0, 4.0]
+protected_indices: []
+preservation_weight: 0.0
+rho: 0.05
+eta: 0.0
+reliability_gate: false
+controller_frequency: 5
+calibration_status: frozen_from_validation
+threshold: {m_early: -0.5, m_late: 0.75, gamma: 1.5}

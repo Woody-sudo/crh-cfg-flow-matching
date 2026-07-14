@@ -1,0 +1,39 @@
+method: crh_cfg
+variant: full
+inherits: configs/hw3_baseline_frozen.yaml
+candidate_scales: [0.5, 1.0, 1.5, 2.0, 3.0, 4.0]
+targets:
+  smiling_present:
+    condition: [2, 0, 0]
+    evaluator_index: 0
+    target_sign: 1
+    protected_indices: [1, 2, 3, 4]
+  bangs_present:
+    condition: [0, 2, 0]
+    evaluator_index: 1
+    target_sign: 1
+    protected_indices: [0, 2, 3, 4]
+  blond_hair:
+    condition: [0, 0, 2]
+    evaluator_index: 3
+    target_sign: 1
+    protected_indices: [0, 1]
+threshold:
+  m_early: -0.5
+  m_late: 0.75
+  gamma: 1.5
+preservation:
+  epsilon_early: 2.0
+  epsilon_late: 0.5
+penalties:
+  alpha: 1.0
+  preservation_weight: 1.0
+  rho: 0.05
+  eta: 0.2
+reliability_gate:
+  enabled: true
+  tau_on: 0.1
+  default_scale: 2.0
+controller_frequency: 5
+calibration_status: frozen_from_validation
+calibration_artifact: not_redistributed_see_reproducibility_document

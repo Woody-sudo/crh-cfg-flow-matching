@@ -1,0 +1,25 @@
+% Shared packages for the CVPR-style review draft.
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{makecell}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{microtype}
+\usepackage{xspace}
+
+\newcommand{\method}{CRH-CFG\xspace}
+\newcommand{\tbd}{\textcolor{red}{TBD}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\hinge}[1]{\left[#1\right]_{+}}
+\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+% Include derivations and implementation details after the main paper.
+\newif\ifincludesupplementary
+\includesupplementarytrue

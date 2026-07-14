@@ -1,0 +1,10 @@
+method: hw3_baseline
+generator_checkpoint: /path/to/frozen_hw3_checkpoint.pt
+generator_sha256: 3fef39c9f073bf5a9ca4ed8379a2c39a4af4d67c52678e641493dbc6d7d2288a
+use_ema: true
+sampler: heun
+num_steps: 50
+guidance_scale: 2.0
+batch_size: 64
+reference_protocol: full_63715_celeba_hw3_torch_fidelity
+
