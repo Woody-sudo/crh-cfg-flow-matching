@@ -5,7 +5,18 @@ This repository presents the HW3 → HW4 research progression from CMU 10-799: D
 - **HW3 — establish:** train a semantic conditional Flow Matching model and verify that classifier-free guidance controls CelebA attributes.
 - **HW4 — control:** freeze that generator, reuse its conditional/unconditional field pair, and select guidance online under target and preservation constraints.
 
-[HW3 baseline](hw3/README.md) · [HW4 method](hw4/README.md) · [Paper](hw4/paper/main.pdf) · [Course poster](hw4/poster/crh_cfg_poster.pdf)
+[HW3 baseline](hw3/README.md) · [HW4 method](hw4/README.md) · [Code](src/)
+
+## HW4 paper and poster
+
+| Paper | Course poster |
+| --- | --- |
+| **Constraint-Aware Receding-Horizon Classifier-Free Guidance for Attribute-Conditioned Flow Matching** | **CRH-CFG: Field Reuse → Endpoint Reasoning → Constrained Action** |
+| [Read the paper (PDF)](hw4/paper/main.pdf) · [LaTeX source](hw4/paper/main.tex) · [Bibliography](hw4/paper/main.bib) | [View the poster (PDF)](hw4/poster/crh_cfg_poster.pdf) · [Editable PowerPoint](hw4/poster/crh_cfg_poster.pptx) |
+
+[![Open the HW4 paper](hw4/figures/blond_hair_paired_methods.png)](hw4/paper/main.pdf)
+
+*Click the figure to open the full HW4 paper.*
 
 ## Research arc
 
