@@ -21,8 +21,9 @@ usual fixed-scale implementation suggests. Once a frozen model has produced
 conditional and unconditional velocities, any guidance scale can be evaluated
 by affine recombination without another generator call. Under a straight Flow
 Matching path, each recombined velocity also gives an analytic clean-endpoint
-forecast. We use this relation to define Constraint-Aware Receding-Horizon CFG
-(\method). The controller periodically forms a finite endpoint bank, measures
+forecast. We use this relation to define Constraint-aware Receding-Horizon
+Classifier-Free Guidance (\method). The controller periodically forms a finite
+endpoint bank, measures
 target margin and protected-attribute drift with a separate evaluator, and
 selects a scale through constrained minimum-intervention feedback. An early
 reliability gate limits decisions made from noisy endpoint forecasts, while
