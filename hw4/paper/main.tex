@@ -153,6 +153,34 @@ feedback without a multi-step generator rollout.
 \section{Method: constraint-aware receding-horizon CFG}
 \label{sec:method}
 
+Algorithm~\ref{alg:crh} gives the complete inference loop before the individual
+controller components are defined.
+
+\begin{algorithm}[h]
+\caption{\method{} inference with Heun integration}
+\label{alg:crh}
+\small
+\begin{algorithmic}[1]
+\Require Frozen $\theta$, state $x$, condition $c$, candidate set $\mathcal W$,
+evaluator $F_{\mathrm{ctrl}}$
+\State $w_{\mathrm{prev}}\gets1$
+\For{$k=0,\ldots,49$}
+    \State Compute $(v_u,v_c)$ once at the current state
+    \If{$k$ is a controller decision}
+        \State Construct and score all endpoints by
+        Eqs.~\eqref{eq:candidates} and \eqref{eq:candidate-endpoints}
+        \State Select $w^\star$ by Eq.~\eqref{eq:feasible-objective}
+        or Eq.~\eqref{eq:fallback}
+    \Else
+        \State $w^\star\gets w_{\mathrm{prev}}$
+    \EndIf
+    \State Apply one Heun step, holding $w^\star$ for the corrector
+    \State $w_{\mathrm{prev}}\gets w^\star$
+\EndFor
+\State \Return $x$
+\end{algorithmic}
+\end{algorithm}
+
 \begin{figure*}[t]
 \centering
 \resizebox{\textwidth}{!}{%
@@ -264,7 +292,7 @@ $x_{s+h}$ and replanning. Static CFG and \method both execute 100 guided fields,
 equal to 200 conditional or unconditional U-Net forwards per trajectory.
 \method adds ten batched evaluator decisions without launching another
 generator trajectory. Appendix~\ref{app:controller-details} gives the Heun
-update, algorithm, and complexity.
+update and complexity.
 
 \section{Experimental protocol}
 \label{sec:experiments}
@@ -692,31 +720,8 @@ v_{w_s^\star}(\tilde{x}_{s+h},s+h)\right].
 \label{eq:heun}
 \end{align}
 The fixed $w_s^\star$ keeps the numerical protocol unchanged within a
-macro-step.
-
-\begin{algorithm}[h]
-\caption{\method{} with Heun protocol B}
-\label{alg:crh}
-\begin{algorithmic}[1]
-\Require Frozen $\theta$, state $x$, condition $c$, candidate set $\mathcal W$,
-evaluator $F_{\mathrm{ctrl}}$
-\State $w_{\mathrm{prev}}\gets1$
-\For{$k=0,\ldots,49$}
-    \State Compute $(v_u,v_c)$ once at the current state
-    \If{$k$ is a controller decision}
-        \State Construct and score all endpoints by
-        Eqs.~\eqref{eq:candidates} and \eqref{eq:candidate-endpoints}
-        \State Select $w^\star$ by Eq.~\eqref{eq:feasible-objective}
-        or Eq.~\eqref{eq:fallback}
-    \Else
-        \State $w^\star\gets w_{\mathrm{prev}}$
-    \EndIf
-    \State Apply one Heun step, holding $w^\star$ for the corrector
-    \State $w_{\mathrm{prev}}\gets w^\star$
-\EndFor
-\State \Return $x$
-\end{algorithmic}
-\end{algorithm}
+macro-step. Algorithm~\ref{alg:crh} gives the complete inference loop in the
+main paper.
 
 For batch size $B$ and $M=|\mathcal W|$, the candidate endpoints form an
 $M\times B\times C\times H\times W$ tensor. The implementation clips the
