@@ -16,27 +16,21 @@ for Attribute-Conditioned Flow Matching}
 \maketitle
 
 \begin{abstract}
-Scalar classifier-free guidance (CFG) has more reusable structure than its
-usual fixed-scale implementation suggests. Once a frozen model has produced
-conditional and unconditional velocities, any guidance scale can be evaluated
-by affine recombination without another generator call. Under a straight Flow
-Matching path, each recombined velocity also gives an analytic clean-endpoint
-forecast. We use this relation to define Constraint-aware Receding-Horizon
-Classifier-Free Guidance (\method). The controller periodically forms a finite
-endpoint bank, measures
-target margin and protected-attribute drift with a separate evaluator, and
-selects a scale through constrained minimum-intervention feedback. An early
-reliability gate limits decisions made from noisy endpoint forecasts, while
-scale holding preserves each Heun predictor-corrector pair. \method leaves the
-generator, solver, and generator evaluation count unchanged: every trajectory
-uses 100 guided-field evaluations and 200 raw U-Net forwards. On three positive
-CelebA attribute requests with 1,000 paired seeds each, mean success changes
-from 98.4\% under static CFG to 98.8\%, with 1.80\% mean wall-time overhead.
-This difference is descriptive, not inferential, because paired outcome
-transitions are unavailable. The common-reference preservation metrics do not
-improve, and full-marginal KID cannot determine conditional quality. In this
-experiment, the affine CFG direction supports feedback with small measured
-overhead. General quality and preservation gains remain unsupported.
+Classifier-free guidance (CFG) applies a fixed scale, although each
+conditional-unconditional field pair defines a reusable one-dimensional control
+axis. We introduce Constraint-aware Receding-Horizon Classifier-Free Guidance
+(\method), a training-free controller. At each decision state, \method affinely
+recombines the field pair into a scale bank, maps each candidate to a
+closed-form clean-endpoint estimate, and scores the endpoints with a frozen
+evaluator. It filters candidates by target margin and protected-logit drift,
+then selects the feasible scale requiring the least deviation from ordinary
+conditioning and the previous decision; a finite violation objective handles
+empty feasible sets. The chosen scale is held across one Heun macro-step, while
+the fields are recomputed at the predicted state. After accepting the corrected
+state, the controller observes and replans. This loop adds evaluator work but no
+generator evaluations or training and retains the original Heun discretization.
+CelebA experiments show a modest adherence improvement with low overhead,
+while preservation does not improve and conditional quality remains unresolved.
 \end{abstract}
 
 \section{Introduction}
@@ -58,8 +52,8 @@ the useful amount of guidance varies across time and samples
 The frozen field already contains the action space needed for feedback. A
 conditional and unconditional pair exposes one scalar direction,
 $g_s=v_c-v_u$, and affine recombination produces every ordinary CFG candidate.
-For a straight path, each candidate also predicts a clean endpoint in closed
-form. This lets one field pair support a bank of evaluator-scored actions.
+For a straight path, each candidate also gives a closed-form estimate of the
+clean endpoint. This lets one field pair support a bank of evaluator-scored actions.
 The bank remains one-dimensional, so scale selection cannot produce an effect
 outside the direction already present in the model.
 
@@ -67,8 +61,9 @@ outside the direction already present in the model.
 predicts a finite endpoint bank and filters the candidates by target margin and
 protected-attribute drift. It then favors scales close to ordinary conditional
 generation and to the previous decision. An early gate avoids acting on the
-least reliable forecasts, and a finite fallback handles empty feasible sets.
-Holding the selected scale across each Heun pair keeps generator work matched.
+least reliable estimates, and a finite fallback handles empty feasible sets.
+Within each Heun macro-step, the selected scale is fixed while the field is
+reevaluated at the predicted state, keeping generator work matched.
 
 Connecting the affine CFG line to straight-path endpoint prediction yields a
 vectorized, training-free controller. The
@@ -93,8 +88,9 @@ when or how strongly a condition acts. Guidance rescaling also depends on the
 noise schedule \cite{lin2023common}. Online feedback instead uses an auxiliary
 evaluator to select a scale at each step \cite{papalampidi2025dynamic}.
 \method belongs to this last group, but restricts its actions to the ordinary
-CFG line and obtains its look-ahead from the analytic endpoint of a straight
-flow. Its objective also accounts for intervention size and non-target drift.
+CFG line and obtains its look-ahead from a closed-form endpoint estimate under
+a straight path. Its objective also accounts for intervention size and
+non-target drift.
 
 \paragraph{Guidance geometry and cost.}
 Strong extrapolation can move a sample away from the learned trajectory.
@@ -156,7 +152,7 @@ feedback without a multi-step generator rollout.
 Algorithm~\ref{alg:crh} gives the complete inference loop before the individual
 controller components are defined.
 
-\begin{algorithm}[h]
+\begin{algorithm}[ht]
 \caption{\method{} inference with Heun integration}
 \label{alg:crh}
 \small
@@ -174,7 +170,9 @@ evaluator $F_{\mathrm{ctrl}}$
     \Else
         \State $w^\star\gets w_{\mathrm{prev}}$
     \EndIf
-    \State Apply one Heun step, holding $w^\star$ for the corrector
+    \State Predict $\tilde{x}_{s+h}$ using $w^\star$ at $(x_s,s)$
+    \State Recompute $(v_u,v_c)$ at $(\tilde{x}_{s+h},s+h)$
+    \State Correct to $x_{s+h}$ using the same $w^\star$
     \State $w_{\mathrm{prev}}\gets w^\star$
 \EndFor
 \State \Return $x$
@@ -202,7 +200,7 @@ evaluator $F_{\mathrm{ctrl}}$
 \node[field, text width=1.75cm, right=0.28cm of unet] (bank)
     {affine bank\\$v_w=v_u+w g_s$};
 \node[reason, text width=1.75cm, right=0.28cm of bank] (endpoint)
-    {endpoint forecast\\$\hat x_0(w)$};
+    {endpoint estimate\\$\hat x_0(w)$};
 \node[reason, text width=1.75cm, right=0.28cm of endpoint] (eval)
     {frozen $F_{\rm ctrl}$\\margin + drift};
 \node[control, text width=1.65cm, right=0.28cm of eval] (filter)
@@ -212,7 +210,7 @@ evaluator $F_{\mathrm{ctrl}}$
 \node[control, text width=1.45cm, right=0.28cm of select] (gate)
     {reliability gate\\+ fallback};
 \node[execute, text width=1.60cm, right=0.28cm of gate] (heun)
-    {Heun pair\\hold $w_s^\star$};
+    {Heun pair\\hold $w_s^\star$; reevaluate};
 \draw[flow] (state) -- (unet);
 \draw[flow] (unet) -- node[above, font=\tiny] {one pair} (bank);
 \draw[flow] (bank) -- (endpoint);
@@ -285,14 +283,28 @@ with the lowest violation cost and records which constraints failed. Appendix
 \subsection{Receding-horizon execution}
 
 Validation selected $w=2$ during $s<\tau_{\mathrm{on}}=0.1$, when endpoint
-forecasts are least reliable. After the gate, the controller runs every five
-Heun macro-steps and holds the previous scale between decisions. It also holds
-$w_s^\star$ across the Heun predictor-corrector pair before observing
-$x_{s+h}$ and replanning. Static CFG and \method both execute 100 guided fields,
-equal to 200 conditional or unconditional U-Net forwards per trajectory.
-\method adds ten batched evaluator decisions without launching another
-generator trajectory. Appendix~\ref{app:controller-details} gives the Heun
-update and complexity.
+estimates are least reliable. After the gate, the controller runs every five
+Heun macro-steps and holds the previous scale between decisions.
+
+\paragraph{Heun-consistent scale holding.}
+At a controller decision state $x_s$, \method first selects $w_s^\star$. This
+scalar is held fixed over the complete Heun macro-step. The predictor evaluates
+$v_{w_s^\star}(x_s,s)$ and forms a provisional state $\tilde{x}_{s+h}$. The
+conditional and unconditional fields are then recomputed at
+$(\tilde{x}_{s+h},s+h)$ and recombined using the same $w_s^\star$ for the
+corrector. The controller replans only after the corrected state $x_{s+h}$ is
+obtained. Scale holding therefore fixes the control action within a macro-step;
+it does not reuse the predictor velocity.
+
+Each Heun macro-step requires two guided-field evaluations, one at the current
+state and one at the predicted state. Each guided-field evaluation comprises
+one conditional and one unconditional U-Net forward. Across 50 macro-steps,
+static CFG and \method therefore both execute 100 guided-field evaluations, or
+200 raw U-Net forwards per trajectory. The candidate bank is constructed by
+affine recombination of the field pair already computed at a decision state.
+\method adds ten batched evaluator decisions but no generator evaluations or
+additional generator trajectories. Appendix~\ref{app:controller-details} gives
+the Heun update and complexity.
 
 \section{Experimental protocol}
 \label{sec:experiments}
@@ -309,7 +321,7 @@ requests are positive Smiling, Bangs, and Blond Hair. Appendix
 We compare static $w=2$, validation-selected interval CFG, target-only
 feedback, target-plus-preservation feedback, and full \method. All methods use
 the same checkpoint, EMA weights, conditions, initial noises, and 50-step Heun
-solver. Each target has 1,000 shared seeds; the ablations use the first 256.
+discretization. Each target has 1,000 shared seeds; the ablations use the first 256.
 Controller schedules and penalties are selected on validation data and then
 frozen. Appendix~\ref{app:experimental-details} records their values.
 
@@ -332,7 +344,8 @@ definitions.
 
 \begin{table*}[t]
 \caption{Main results on 1,000 paired seeds per target. All methods use the
-same frozen generator and 50-step Heun solver. Drift and flip are relative to
+same frozen generator and 50-step Heun discretization. Drift and flip are
+relative to
 the paired static $w=2$ result; $\mathrm{KID}_{\mathrm{marg}}$ is mean $\pm$
 subset standard deviation against the inherited full-marginal reference. All
 rows use 100 guided-field evaluations.}
@@ -627,8 +640,9 @@ control of sensitive attributes.
 
 \method combines the affine CFG action line with straight-path endpoint
 prediction to provide finite, minimum-intervention feedback for a frozen flow.
-It keeps the solver and generator evaluation count fixed and adds 1.80\% mean
-wall time. Across three targets with 1,000 paired seeds each, mean success
+It retains the same 50-step Heun discretization and generator evaluation count
+as static CFG and adds 1.80\% mean wall time. Across three targets with 1,000
+paired seeds each, mean success
 changes by a descriptive $+0.4$ percentage points. Common-reference
 preservation does not improve, and marginal-reference KID cannot determine
 conditional quality. The method provides low-overhead adaptive correction
@@ -665,7 +679,7 @@ velocity $v_s=-u_t=x_0-x_1$. Substitution gives
     \label{eq:data-pred-native}
 \end{equation}
 The equality is exact for the ideal straight bridge. With a learned velocity,
-the expression becomes a one-step endpoint forecast.
+the expression becomes a closed-form one-step endpoint estimate.
 
 For CFG, $v_w-v_1=(w-1)(v_c-v_u)=(w-1)g_s$. The native endpoint map then
 implies
@@ -719,9 +733,11 @@ x_{s+h}&=x_s+\frac{h}{2}\left[v_{w_s^\star}(x_s,s)+
 v_{w_s^\star}(\tilde{x}_{s+h},s+h)\right].
 \label{eq:heun}
 \end{align}
-The fixed $w_s^\star$ keeps the numerical protocol unchanged within a
-macro-step. Algorithm~\ref{alg:crh} gives the complete inference loop in the
-main paper.
+The conditional and unconditional branches in the second guided-field term are
+recomputed at the predicted state. The shared $w_s^\star$ fixes the control
+action, not the velocity, within the macro-step. Replanning occurs only after
+$x_{s+h}$ has been obtained. Algorithm~\ref{alg:crh} gives the complete
+inference loop in the main paper.
 
 For batch size $B$ and $M=|\mathcal W|$, the candidate endpoints form an
 $M\times B\times C\times H\times W$ tensor. The implementation clips the
@@ -819,7 +835,7 @@ Item & Frozen value \\
 Generator & 18,535,619-parameter conditional U-Net; EMA checkpoint; no HW4
 updates \\
 Integrator & 50 Heun macro-steps; selected scale held per predictor-corrector
-pair \\
+pair; fields recomputed at the predicted state \\
 Main seeds & 410000 through 410999 for each target and method \\
 Ablation seeds & First 256 main seeds for each target \\
 Controller & Ten decisions per trajectory; gate for $s<0.1$ \\
