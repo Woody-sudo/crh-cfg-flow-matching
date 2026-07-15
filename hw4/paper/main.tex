@@ -16,21 +16,23 @@ for Attribute-Conditioned Flow Matching}
 \maketitle
 
 \begin{abstract}
-Classifier-free guidance (CFG) applies a fixed scale, although each
-conditional-unconditional field pair defines a reusable one-dimensional control
-axis. We introduce Constraint-aware Receding-Horizon Classifier-Free Guidance
-(\method), a training-free controller. At each decision state, \method affinely
-recombines the field pair into a scale bank, maps each candidate to a
-closed-form clean-endpoint estimate, and scores the endpoints with a frozen
-evaluator. It filters candidates by target margin and protected-logit drift,
-then selects the feasible scale requiring the least deviation from ordinary
-conditioning and the previous decision; a finite violation objective handles
-empty feasible sets. The chosen scale is held across one Heun macro-step, while
-the fields are recomputed at the predicted state. After accepting the corrected
-state, the controller observes and replans. This loop adds evaluator work but no
-generator evaluations or training and retains the original Heun discretization.
-CelebA experiments show a modest adherence improvement with low overhead,
-while preservation does not improve and conditional quality remains unresolved.
+Classifier-free guidance (CFG) usually uses a fixed scale and cannot respond to
+sample-specific generation states. We ask whether a frozen
+conditional--unconditional field pair can instead support online adaptation
+without additional generator evaluations. We introduce Constraint-aware
+Receding-Horizon Classifier-Free Guidance (\method), a constrained
+receding-horizon search over scalar CFG actions. The search proceeds in three
+stages. First, it affinely reuses the field pair to
+construct candidate velocities and closed-form clean-endpoint estimates.
+Second, a frozen evaluator scores these endpoints; target-margin and
+protected-logit-drift constraints define the feasible set, within which the
+algorithm selects the action closest to ordinary conditioning and the previous
+choice, with a fallback when none is feasible. Third, it executes the selected
+action for one Heun macro-step, recomputes fields at the predicted state, and
+searches again after correction. This training-free search adds evaluator work
+but no additional generator evaluations and retains the original Heun discretization.
+CelebA experiments show modest adherence improvement at low overhead, while
+preservation and conditional quality gains remain unsupported.
 \end{abstract}
 
 \section{Introduction}
@@ -149,11 +151,14 @@ feedback without a multi-step generator rollout.
 \section{Method: constraint-aware receding-horizon CFG}
 \label{sec:method}
 
-Algorithm~\ref{alg:crh} gives the complete inference loop before the individual
-controller components are defined.
+At each decision, \method performs a constrained discrete search over
+$\mathcal W$: it enumerates scalar CFG actions, scores their estimated
+endpoints, filters infeasible candidates, and executes the selected action for
+one Heun macro-step. Algorithm~\ref{alg:crh} gives the complete search-and-execute
+loop before the individual components are defined.
 
 \begin{algorithm}[ht]
-\caption{\method{} inference with Heun integration}
+\caption{\method{} constrained search with Heun integration}
 \label{alg:crh}
 \small
 \begin{algorithmic}[1]
