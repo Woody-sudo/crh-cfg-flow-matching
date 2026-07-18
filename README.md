@@ -1,5 +1,7 @@
 # From Conditional Flow Matching to Constraint-Aware Guidance
 
+[![CRH-CFG method overview](hw4/figures/crh_cfg_method_overview.png)](hw4/paper/main.pdf)
+
 **CMU 10-799: Diffusion & Flow Matching · Spring 2026 · Mu Chen**
 
 This repository presents the HW3 → HW4 research progression developed for **CMU 10-799: Diffusion & Flow Matching**.
