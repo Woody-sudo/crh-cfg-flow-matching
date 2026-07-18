@@ -186,58 +186,14 @@ evaluator $F_{\mathrm{ctrl}}$
 
 \begin{figure*}[t]
 \centering
-\resizebox{\textwidth}{!}{%
-\begin{tikzpicture}[
-    font=\scriptsize,
-    >=Latex,
-    box/.style={draw, rounded corners=2.5pt, align=center, minimum height=1.05cm,
-                inner xsep=4pt, line width=0.45pt},
-    field/.style={box, fill=blue!8, draw=blue!55},
-    reason/.style={box, fill=cyan!9, draw=cyan!55!black},
-    control/.style={box, fill=orange!10, draw=orange!70!black},
-    execute/.style={box, fill=purple!8, draw=purple!55},
-    flow/.style={->, line width=0.55pt},
-    meta/.style={font=\scriptsize\bfseries, text=cvprblue, align=center}
-]
-\node[field, text width=1.20cm] (state) {observe\\$x_s,s,c$};
-\node[field, text width=1.75cm, right=0.28cm of state] (unet)
-    {frozen flow\\$v_u,\,v_c$};
-\node[field, text width=1.75cm, right=0.28cm of unet] (bank)
-    {affine bank\\$v_w=v_u+w g_s$};
-\node[reason, text width=1.75cm, right=0.28cm of bank] (endpoint)
-    {endpoint estimate\\$\hat x_0(w)$};
-\node[reason, text width=1.75cm, right=0.28cm of endpoint] (eval)
-    {frozen $F_{\rm ctrl}$\\margin + drift};
-\node[control, text width=1.65cm, right=0.28cm of eval] (filter)
-    {constraint filter\\$\mathcal A_s$};
-\node[control, text width=1.70cm, right=0.28cm of filter] (select)
-    {minimum action\\+ smoothness};
-\node[control, text width=1.45cm, right=0.28cm of select] (gate)
-    {reliability gate\\+ fallback};
-\node[execute, text width=1.60cm, right=0.28cm of gate] (heun)
-    {Heun pair\\hold $w_s^\star$; reevaluate};
-\draw[flow] (state) -- (unet);
-\draw[flow] (unet) -- node[above, font=\tiny] {one pair} (bank);
-\draw[flow] (bank) -- (endpoint);
-\draw[flow] (endpoint) -- (eval);
-\draw[flow] (eval) -- (filter);
-\draw[flow] (filter) -- (select);
-\draw[flow] (select) -- (gate);
-\draw[flow] (gate) -- node[above, font=\tiny] {$w_s^\star$} (heun);
-\draw[flow] (heun.south) -- ++(0,-0.55) -| node[pos=0.48, below,
-    font=\tiny, text=cvprblue] {update $x_{s+h}$, observe, and replan}
-    (state.south);
-\node[meta, above=0.18cm of unet] {FIELD REUSE};
-\node[meta, above=0.18cm of endpoint] {ENDPOINT REASONING};
-\node[meta, above=0.18cm of select] {CONSTRAINED ACTION};
-\node[meta, above=0.18cm of heun] {EXECUTE};
-\end{tikzpicture}%
-}
-\caption{The \method control loop. One frozen field pair produces the affine
-candidate bank and its predicted endpoints. The controller selects an action,
-executes it, and observes the next state. Candidate construction and endpoint
-scoring add no generator calls. $F_{\rm eval}$ remains outside the loop and
-measures only final outputs.}
+\includegraphics[width=0.8\textwidth]{../figures/crh_cfg_method_overview.pdf}
+\caption{The \method search-and-execute loop. At a decision state, one frozen
+field pair produces an affine action bank and closed-form endpoint estimates.
+The controller scores and filters the candidates, selects a scale, holds it
+through one Heun predictor-corrector pair while recomputing the field, and then
+replans from the corrected state. The reliability gate reuses a default or
+previous scale when search is bypassed. $F_{\rm eval}$ remains outside the
+control loop and measures only final outputs.}
 \label{fig:method-overview}
 \end{figure*}
 
