@@ -18,8 +18,8 @@
 \begin{tikzpicture}[
   x=1cm,y=1cm,
   font=\sffamily\fontsize{9.4}{10.8}\selectfont,
-  >={Latex[length=2.5mm,width=1.7mm]},
-  flow/.style={-{Latex[length=2.5mm,width=1.7mm]},line width=0.75pt,draw=black},
+  >={Latex[length=1.6mm,width=1.15mm]},
+  flow/.style={-{Latex[length=1.6mm,width=1.15mm]},line width=0.75pt,draw=black},
   route/.style={line width=0.75pt,draw=black},
   box/.style={
     rounded corners=2.7mm,
@@ -68,7 +68,7 @@
   {\fontsize{7.8}{8.8}\selectfont$\boldsymbol{v}_{\theta}(\boldsymbol{x}_s,s,c/\varnothing)$}
 };
 
-\node[sagebox,text width=1.84cm,minimum height=2.65cm] (affine) at (9.28,9.18) {
+\node[sagebox,text width=1.84cm,minimum height=2.65cm] (affine) at (9.25,9.18) {
   {\fontsize{10.2}{11.4}\selectfont Affine}\\[-0.5mm]
   {\fontsize{10.2}{11.4}\selectfont CFG}\\[-0.5mm]
   {\fontsize{10.2}{11.4}\selectfont Action}\\[-0.5mm]
@@ -84,13 +84,13 @@
   $\{\hat{\boldsymbol{x}}_0(w)\}$
 };
 
-\node[periwinklebox,text width=1.25cm,minimum height=2.65cm] (score) at (13.38,9.18) {
+\node[periwinklebox,text width=1.25cm,minimum height=2.65cm] (score) at (13.55,9.18) {
   {\fontsize{10.2}{11.4}\selectfont Batched}\\[-0.3mm]
   $F_{\mathrm{ctrl}}$\\[-0.3mm]
   {\fontsize{10.2}{11.4}\selectfont Scoring}
 };
 
-\node[rosebox,text width=1.72cm,minimum height=2.65cm] (margin) at (15.38,9.18) {
+\node[rosebox,text width=1.72cm,minimum height=2.65cm] (margin) at (15.64,9.18) {
   {\fontsize{10.2}{11.4}\selectfont Target}\\[-0.5mm]
   {\fontsize{10.2}{11.4}\selectfont Margin}\\[-0.5mm]
   $M$\\[-0.8mm]
@@ -100,7 +100,7 @@
   $D_{\mathrm{ntl}}$
 };
 
-\node[coralbox,text width=1.51cm,minimum height=2.65cm] (filter) at (17.70,9.18) {
+\node[coralbox,text width=1.51cm,minimum height=2.65cm] (filter) at (17.87,9.18) {
   {\fontsize{10.2}{11.4}\selectfont Feasible-}\\[-0.5mm]
   {\fontsize{10.2}{11.4}\selectfont Set}\\[-0.5mm]
   {\fontsize{10.2}{11.4}\selectfont Filter} $\mathcal{A}_s$
